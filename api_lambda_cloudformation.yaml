@@ -1,0 +1,114 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ApiGateway Deploy
+
+Parameters:
+  lambdaFunctionName:
+    Type: String
+    AllowedPattern: "[a-zA-Z0-9]+[a-zA-Z0-9-]+[a-zA-Z0-9]+"
+    Default: Hello-Twitch
+
+
+Resources:
+
+  lambdaIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+      Policies:
+        - PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Effect: Allow
+                Resource:
+                  - !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${lambdaFunctionName}:*
+          PolicyName: lambda
+
+
+  lambda:
+    Type: "AWS::Lambda::Function"
+    Properties:
+      FunctionName: !Ref lambdaFunctionName
+      Handler: index.handler
+      Runtime: nodejs16.x
+      Role: !GetAtt lambdaIAMRole.Arn
+      Timeout: 300
+      Code:
+        ZipFile: |
+          "use strict";
+
+          module.exports.handler = async (event) => {
+            return {
+              statusCode: 200,
+              body:
+                {
+                  message: "Hello Twitch",
+                  input: event,
+                }
+            };
+          };
+
+  apiGateway:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: "Example API REST"
+      Description: "ApiGateway example"
+      Body:
+        swagger: "2.0"
+        info:
+          version: "2022-03-28T10:45:09Z"
+          title: "ApiGateway example"
+        host: "tn746yhr6k.execute-api.us-east-1.amazonaws.com"
+        basePath: "/dev"
+        schemes:
+        - "https"
+        paths:
+          /hello:
+            get:
+              produces:
+              - "application/json"
+              responses:
+                "200":
+                  description: "200 response"
+                  schema:
+                    $ref: "#/definitions/Empty"
+              x-amazon-apigateway-integration:
+                type: "aws"
+                httpMethod: "POST"
+                uri: !Sub
+                  -  arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${lambdaArn}/invocations
+                  - lambdaArn: !GetAtt lambda.Arn
+                responses:
+                  default:
+                    statusCode: "200"
+                passthroughBehavior: "when_no_match"
+                contentHandling: "CONVERT_TO_TEXT"
+        definitions:
+          Empty:
+            type: "object"
+            title: "Empty Schema"
+
+  lambdaApiGatewayInvoke:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt lambda.Arn
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${apiGateway}/*/GET/hello
+
+  apiGatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref apiGateway
+      StageName: "call"
