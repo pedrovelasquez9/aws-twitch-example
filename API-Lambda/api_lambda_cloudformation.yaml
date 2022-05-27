@@ -63,7 +63,7 @@ Resources:
     Type: AWS::ApiGateway::RestApi
     Properties:
       Name: "Example API REST"
-      Description: "ApiGateway example"
+      Description: "ApiGateway Hello"
       Body:
         swagger: "2.0"
         info:
