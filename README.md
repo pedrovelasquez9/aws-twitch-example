@@ -12,11 +12,14 @@
 
 
 ## API-Lambda
+
+You have a step by step guide in /API-Lambda folder
+
 ![alt text](https://gitlab.com/a-cloud-mission/twitch/-/raw/main/API-Lambda/APi-Lambda.jpg)
 
 ## CloudFront-S3
 ![alt text](https://gitlab.com/a-cloud-mission/twitch/-/raw/main/CloudFront-S3/Esquema-CF-S3.jpg)
 
 ### Remeber
-Change the BucketName in the cloudformation template
+Change the BucketName in the cloudformation template and
 Upload /Web to the bucket
