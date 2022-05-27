@@ -12,10 +12,10 @@
 
 
 ## API-Lambda
-![alt text](https://gitlab.com/a-cloud-mission/twitch/API-Lambda/APi-Lambda.jpg?raw=true)
+![alt text](https://gitlab.com/a-cloud-mission/twitch/-/raw/main/API-Lambda/APi-Lambda.jpg)
 
 ## CloudFront-S3
-![alt text](https://gitlab.com/a-cloud-mission/twitch/CloudFront-S3/Esquema-CF-S3.jpg?raw=true)
+![alt text](https://gitlab.com/a-cloud-mission/twitch/-/raw/main/CloudFront-S3/Esquema-CF-S3.jpg)
 
 ### Remeber
 Change the BucketName in the cloudformation template
